@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ClientPulse — AI Client Relationship Agent</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Roboto, Arial, sans-serif;
+
+            color: #182033;
+
+            background:
+                radial-gradient(circle at 10% 10%, rgba(139,92,246,.14), transparent 30%),
+                radial-gradient(circle at 90% 15%, rgba(59,130,246,.14), transparent 30%),
+                radial-gradient(circle at 50% 90%, rgba(236,72,153,.10), transparent 35%),
+                #f7f8fc;
+
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+
+        /* =========================
+           BACKGROUND BLOBS
+        ========================= */
+
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: .35;
+            pointer-events: none;
+            z-index: -1;
+            animation: floatBlob 12s ease-in-out infinite alternate;
+        }
+
+        .blob.one {
+            width: 280px;
+            height: 280px;
+            background: #8b5cf6;
+            top: 80px;
+            left: -100px;
+        }
+
+        .blob.two {
+            width: 320px;
+            height: 320px;
+            background: #38bdf8;
+            top: 420px;
+            right: -120px;
+            animation-delay: 2s;
+        }
+
+        .blob.three {
+            width: 250px;
+            height: 250px;
+            background: #ec4899;
+            bottom: -80px;
+            left: 35%;
+            animation-delay: 4s;
+        }
+
+        @keyframes floatBlob {
+
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+
+            to {
+                transform: translate(30px, -25px) scale(1.12);
+            }
+        }
+
+
+        /* =========================
+           NAVBAR
+        ========================= */
+
+        header {
+
+            position: sticky;
+            top: 0;
+
+            z-index: 100;
+
+            height: 72px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 6%;
+
+            background: rgba(255,255,255,.78);
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            border-bottom: 1px solid rgba(255,255,255,.7);
+        }
+
+
+        .brand {
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+
+        .brand-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 13px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 21px;
+
+            background:
+                linear-gradient(135deg,#7c3aed,#4f46e5);
+
+            color: white;
+
+            box-shadow:
+                0 8px 25px rgba(99,102,241,.3);
+
+            animation: pulseIcon 3s infinite;
+        }
+
+        @keyframes pulseIcon {
+
+            0%,100% {
+                box-shadow: 0 8px 25px rgba(99,102,241,.25);
+            }
+
+            50% {
+                box-shadow: 0 8px 35px rgba(139,92,246,.55);
+            }
+        }
+
+
+        .brand-text h2 {
+
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .brand-text span {
+
+            font-size: 11px;
+            color: #7c3aed;
+            font-weight: 600;
+        }
+
+
+        .memory-status {
+
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 8px 14px;
+
+            border-radius: 30px;
+
+            background: rgba(16,185,129,.09);
+
+            border: 1px solid rgba(16,185,129,.18);
+
+            color: #047857;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+
+        .status-dot {
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #10b981;
+
+            box-shadow: 0 0 0 5px rgba(16,185,129,.12);
+
+            animation: statusPulse 2s infinite;
+        }
+
+
+        @keyframes statusPulse {
+
+            0%,100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .4;
+            }
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .container {
+
+            width: min(1250px, 92%);
+
+            margin: auto;
+
+            padding: 60px 0 100px;
+        }
+
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+
+            text-align: center;
+
+            max-width: 850px;
+
+            margin: 0 auto 50px;
+
+            animation: fadeUp .7s ease;
+        }
+
+
+        .hero-badge {
+
+            display: inline-flex;
+
+            align-items: center;
+            gap: 7px;
+
+            padding: 8px 15px;
+
+            border-radius: 30px;
+
+            background: rgba(124,58,237,.08);
+
+            border: 1px solid rgba(124,58,237,.15);
+
+            color: #6d28d9;
+
+            font-size: 12px;
+            font-weight: 800;
+
+            margin-bottom: 18px;
+        }
+
+
+        .hero h1 {
+
+            font-size: clamp(38px, 5vw, 64px);
+
+            line-height: 1.04;
+
+            letter-spacing: -2.5px;
+
+            font-weight: 850;
+
+            margin-bottom: 18px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #111827,
+                    #6d28d9,
+                    #2563eb,
+                    #db2777
+                );
+
+            background-size: 300% auto;
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+
+            animation: gradientMove 7s ease infinite;
+        }
+
+
+        @keyframes gradientMove {
+
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+
+        .hero p {
+
+            max-width: 680px;
+
+            margin: auto;
+
+            color: #64748b;
+
+            font-size: 17px;
+
+            line-height: 1.7;
+        }
+
+
+        @keyframes fadeUp {
+
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        /* =========================
+           MAIN GRID
+        ========================= */
+
+        .dashboard {
+
+            display: grid;
+
+            grid-template-columns: 1.25fr .75fr;
+
+            gap: 22px;
+        }
+
+
+        /* =========================
+           CARDS
+        ========================= */
+
+        .card {
+
+            position: relative;
+
+            background: rgba(255,255,255,.76);
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            border: 1px solid rgba(255,255,255,.9);
+
+            border-radius: 24px;
+
+            padding: 26px;
+
+            box-shadow:
+                0 20px 50px rgba(15,23,42,.07);
+
+            overflow: hidden;
+
+            animation: cardIn .7s ease both;
+        }
+
+
+        .card::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 120px;
+            height: 120px;
+
+            border-radius: 50%;
+
+            background: rgba(139,92,246,.07);
+
+            top: -60px;
+            right: -60px;
+        }
+
+
+        .card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 25px 60px rgba(15,23,42,.10);
+
+            transition: .3s ease;
+        }
+
+
+        @keyframes cardIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        .card-header {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 22px;
+        }
+
+
+        .card-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 13px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 19px;
+
+            background: linear-gradient(
+                135deg,
+                #ede9fe,
+                #dbeafe
+            );
+        }
+
+
+        .card-title h2 {
+
+            font-size: 18px;
+
+            font-weight: 800;
+        }
+
+
+        .card-title p {
+
+            font-size: 12px;
+
+            color: #94a3b8;
+
+            margin-top: 3px;
+        }
+
+
+        /* =========================
+           INPUT AREA
+        ========================= */
+
+        label {
+
+            display: block;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            color: #475569;
+
+            margin-bottom: 8px;
+        }
+
+
+        input,
+        textarea {
+
+            width: 100%;
+
+            border: 1px solid #e2e8f0;
+
+            background: rgba(255,255,255,.82);
+
+            border-radius: 14px;
+
+            padding: 14px 15px;
+
+            font-size: 14px;
+
+            color: #1e293b;
+
+            outline: none;
+
+            margin-bottom: 17px;
+
+            transition: .25s ease;
+        }
+
+
+        input:focus,
+        textarea:focus {
+
+            border-color: #8b5cf6;
+
+            box-shadow:
+                0 0 0 4px rgba(139,92,246,.10);
+
+            background: white;
+        }
+
+
+        textarea {
+
+            min-height: 155px;
+
+            resize: vertical;
+
+            line-height: 1.6;
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .primary-btn {
+
+            width: 100%;
+
+            border: none;
+
+            border-radius: 14px;
+
+            padding: 15px;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+
+            background:
+                linear-gradient(
+                    100deg,
+                    #7c3aed,
+                    #4f46e5,
+                    #2563eb
+                );
+
+            background-size: 200% auto;
+
+            box-shadow:
+                0 12px 25px rgba(79,70,229,.25);
+
+            transition: .3s ease;
+
+            animation: buttonGradient 5s infinite;
+        }
+
+
+        @keyframes buttonGradient {
+
+            0%,100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+
+        .primary-btn:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 16px 35px rgba(79,70,229,.35);
+        }
+
+
+        .primary-btn:active {
+
+            transform: scale(.98);
+        }
+
+
+        /* =========================
+           STATS
+        ========================= */
+
+        .stats {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 14px;
+        }
+
+
+        .stat {
+
+            padding: 20px;
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(124,58,237,.08),
+                    rgba(59,130,246,.06)
+                );
+
+            border: 1px solid rgba(124,58,237,.09);
+        }
+
+
+        .stat:nth-child(2) {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(236,72,153,.08),
+                    rgba(124,58,237,.06)
+                );
+        }
+
+
+        .stat-number {
+
+            font-size: 32px;
+
+            font-weight: 850;
+
+            color: #5b21b6;
+
+            margin-bottom: 5px;
+        }
+
+
+        .stat-label {
+
+            font-size: 12px;
+
+            color: #64748b;
+
+            font-weight: 600;
+        }
+
+
+        .memory-active {
+
+            margin-top: 18px;
+
+            padding: 13px 15px;
+
+            border-radius: 14px;
+
+            background: rgba(16,185,129,.07);
+
+            border: 1px solid rgba(16,185,129,.13);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            font-size: 12px;
+
+            color: #047857;
+
+            font-weight: 700;
+        }
+
+
+        /* =========================
+           PROFILE
+        ========================= */
+
+        .profile-item {
+
+            margin-bottom: 14px;
+        }
+
+
+        .profile-title {
+
+            font-size: 10px;
+
+            letter-spacing: .7px;
+
+            font-weight: 850;
+
+            color: #94a3b8;
+
+            margin-bottom: 6px;
+        }
+
+
+        .profile-value {
+
+            padding: 11px 13px;
+
+            border-radius: 11px;
+
+            background: #f8fafc;
+
+            border: 1px solid #eef2f7;
+
+            color: #334155;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           MEMORY
+        ========================= */
+
+        .memory {
+
+            position: relative;
+
+            padding: 14px 15px 14px 18px;
+
+            margin-bottom: 11px;
+
+            border-radius: 13px;
+
+            background: rgba(248,250,252,.9);
+
+            border: 1px solid #edf1f7;
+
+            font-size: 13px;
+
+            line-height: 1.55;
+
+            color: #334155;
+
+            animation: memoryIn .5s ease both;
+        }
+
+
+        .memory::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+
+            width: 3px;
+
+            border-radius: 4px;
+
+            background:
+                linear-gradient(
+                    #8b5cf6,
+                    #3b82f6
+                );
+        }
+
+
+        @keyframes memoryIn {
+
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+
+        /* =========================
+           FULL WIDTH
+        ========================= */
+
+        .full {
+
+            grid-column: 1 / -1;
+        }
+
+
+        .response-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 22px;
+
+            grid-column: 1 / -1;
+        }
+
+
+        .response-box {
+
+            min-height: 160px;
+
+            padding: 19px;
+
+            border-radius: 16px;
+
+            line-height: 1.7;
+
+            font-size: 14px;
+
+            white-space: pre-wrap;
+        }
+
+
+        .why {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(245,158,11,.09),
+                    rgba(251,191,36,.04)
+                );
+
+            border: 1px solid rgba(245,158,11,.14);
+        }
+
+
+        .before {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(100,116,139,.07),
+                    rgba(148,163,184,.04)
+                );
+
+            border: 1px solid #e2e8f0;
+        }
+
+
+        .after {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(16,185,129,.09),
+                    rgba(59,130,246,.05)
+                );
+
+            border: 1px solid rgba(16,185,129,.16);
+        }
+
+
+        /* =========================
+           SECTION LABEL
+        ========================= */
+
+        .section-label {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            font-size: 11px;
+
+            font-weight: 850;
+
+            letter-spacing: .5px;
+
+            padding: 6px 10px;
+
+            border-radius: 20px;
+
+            background: #f1f5f9;
+
+            color: #64748b;
+
+            margin-bottom: 13px;
+        }
+
+
+        .loading {
+
+            display: none;
+
+            text-align: center;
+
+            padding: 14px;
+
+            color: #7c3aed;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+
+        .loading span {
+
+            display: inline-block;
+
+            animation: bounce 1s infinite;
+        }
+
+
+        @keyframes bounce {
+
+            0%,100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+
+        .error {
+
+            display: none;
+
+            margin-top: 12px;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            background: #fee2e2;
+
+            color: #991b1b;
+
+            font-size: 13px;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+
+            text-align: center;
+
+            padding: 30px;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 900px) {
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .response-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .memory-status {
+                display: none;
+            }
+
+        }
+
+
+        @media(max-width: 600px) {
+
+            .container {
+                width: 94%;
+                padding-top: 40px;
+            }
+
+            .hero h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .card {
+                padding: 20px;
+                border-radius: 19px;
+            }
+
+        }
+
+    
+/* =========================
+   ASK CLIENTPULSE
+========================= */
+
+.ask-card {
+    grid-column: 1 / -1;
+}
+
+.ask-input-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 12px;
+    align-items: end;
+}
+
+.ask-input-row input {
+    margin-bottom: 0;
+}
+
+.ask-btn {
+    width: auto;
+    min-width: 170px;
+    white-space: nowrap;
+}
+
+.ask-answer {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 16px;
+    background: linear-gradient(
+        135deg,
+        rgba(124,58,237,.08),
+        rgba(59,130,246,.06)
+    );
+    border: 1px solid rgba(124,58,237,.12);
+    line-height: 1.7;
+    font-size: 14px;
+    color: #334155;
+    min-height: 70px;
+}
+
+.ask-memories {
+    margin-top: 18px;
+}
+
+.ask-memory {
+    padding: 12px 14px;
+    margin-bottom: 9px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #edf1f7;
+    font-size: 13px;
+    color: #475569;
+}
+
+.ask-loading {
+    display: none;
+    margin-top: 15px;
+    color: #7c3aed;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+@media(max-width: 700px) {
+    .ask-input-row {
+        grid-template-columns: 1fr;
+    }
+
+    .ask-btn {
+        width: 100%;
+    }
+}
+
+    </style>
+</head>
+
+
+<body>
+
+    <!-- Animated background -->
+    <div class="blob one"></div>
+    <div class="blob two"></div>
+    <div class="blob three"></div>
+
+
+    <!-- NAVBAR -->
+
+    <header>
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                🧠
+            </div>
+
+            <div class="brand-text">
+
+                <h2>ClientPulse</h2>
+
+                <span>AI Client Relationship Agent</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="memory-status">
+
+            <div class="status-dot"></div>
+
+            Hindsight Memory Active
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="hero-badge">
+                ✦ MEMORY-POWERED AI
+            </div>
+
+            <h1>
+                Know your clients.<br>
+                Remember everything.
+            </h1>
+
+            <p>
+                ClientPulse learns from every interaction, remembers what
+                matters, and turns accumulated client history into
+                increasingly personalized responses.
+            </p>
+
+        </section>
+
+
+
+        <!-- DASHBOARD -->
+
+        <section class="dashboard">
+
+
+            <!-- INTERACTION -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        💬
+                    </div>
+
+                    <div class="card-title">
+
+                        <h2>New Client Interaction</h2>
+
+                        <p>Teach ClientPulse something new</p>
+
+                    </div>
+
+                </div>
+
+
+                <label>
+                    CLIENT NAME
+                </label>
+
+                <input
+                    type="text"
+                    id="client"
+                    placeholder="e.g. Nova Studios"
+                >
+
+
+                <label>
+                    CLIENT MESSAGE / INTERACTION
+                </label>
+
+                <textarea
+                    id="interaction"
+                    placeholder="Enter a requirement, preference, feedback, budget, request..."
+                ></textarea>
+
+
+                <button
+                    class="primary-btn"
+                    onclick="analyzeInteraction()"
+                >
+                    🧠 Analyze & Remember
+                </button>
+
+
+                <div
+                    class="loading"
+                    id="loading"
+                >
+                    <span>✦</span>
+                    &nbsp; ClientPulse is learning from this interaction...
+                </div>
+
+
+                <div
+                    class="error"
+                    id="error"
+                ></div>
+
+            </div>
+
+
+
+            <!-- MEMORY GROWTH -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        📈
+                    </div>
+
+                    <div class="card-title">
+
+                        <h2>Memory Growth</h2>
+
+                        <p>Watch the relationship evolve</p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stats">
+
+                    <div class="stat">
+
+                        <div
+                            class="stat-number"
+                            id="interactionCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="stat-label">
+                            Interactions Learned
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div
+                            class="stat-number"
+                            id="memoryCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="stat-label">
+                            Relevant Memories
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="memory-active">
+
+                    <div class="status-dot"></div>
+
+                    Hindsight is continuously learning from this client.
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PROFILE -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        🧠
+                    </div>
+
+                    <div class="card-title">
+
+                        <h2>Client Memory Profile</h2>
+
+                        <p>What ClientPulse has learned</p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-title">
+                        PREFERENCES
+                    </div>
+
+                    <div
+                        class="profile-value"
+                        id="preferences"
+                    >
+                        Waiting for client data...
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-title">
+                        DISLIKES
+                    </div>
+
+                    <div
+                        class="profile-value"
+                        id="dislikes"
+                    >
+                        Waiting for client data...
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-title">
+                        BUDGET
+                    </div>
+
+                    <div
+                        class="profile-value"
+                        id="budget"
+                    >
+                        Waiting for client data...
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-title">
+                        FEEDBACK
+                    </div>
+
+                    <div
+                        class="profile-value"
+                        id="feedback"
+                    >
+                        Waiting for client data...
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-title">
+                        IMPORTANT NOTES
+                    </div>
+
+                    <div
+                        class="profile-value"
+                        id="importantNotes"
+                    >
+                        Waiting for client data...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- MEMORIES -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        🔍
+                    </div>
+
+                    <div class="card-title">
+
+                        <h2>Recalled Memories</h2>
+
+                        <p>Relevant history retrieved by Hindsight</p>
+
+                    </div>
+
+                </div>
+
+
+                <div id="memories">
+
+                    <p style="color:#94a3b8;font-size:13px;">
+                        Client memories will appear here after analysis.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- WHY RESPONSE -->
+
+            <div class="card full">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        💡
+                    </div>
+
+                    <div class="card-title">
+
+                        <h2>Why This Response?</h2>
+
+                        <p>See how memory influenced the AI</p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="response-box why"
+                    id="whyMemory"
+                >
+
+                    ClientPulse will explain which memories
+                    influenced the response.
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BEFORE / AFTER -->
+
+            <div class="response-grid">
+
+
+                <div class="card">
+
+                    <div class="section-label">
+                        ◯ BEFORE MEMORY
+                    </div>
+
+                    <div
+                        class="response-box before"
+                        id="beforeResponse"
+                    >
+
+                        A generic response will appear here.
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="card">
+
+                    <div class="section-label">
+                        ✦ AFTER MEMORY
+                    </div>
+
+                    <div
+                        class="response-box after"
+                        id="afterResponse"
+                    >
+
+                        The personalized response will appear here.
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ASK CLIENTPULSE -->
+
+            <div class="card ask-card">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        💬
+                    </div>
+
+                    <div class="card-title">
+
+                        <h2>Ask ClientPulse</h2>
+
+                        <p>Ask questions using the client's long-term memory</p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="ask-input-row">
+
+                    <div>
+
+                        <label>CLIENT NAME</label>
+
+                        <input
+                            type="text"
+                            id="askClient"
+                            placeholder="e.g. Nova Studios"
+                        >
+
+                    </div>
+
+
+                    <div>
+
+                        <label>ASK A QUESTION</label>
+
+                        <input
+                            type="text"
+                            id="askQuestion"
+                            placeholder="e.g. What does this client dislike?"
+                            onkeydown="if(event.key === 'Enter') askClientPulse()"
+                        >
+
+                    </div>
+
+
+                    <button
+                        class="primary-btn ask-btn"
+                        onclick="askClientPulse()"
+                    >
+                        🧠 Ask Memory
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="ask-loading"
+                    id="askLoading"
+                >
+                    ✦ ClientPulse is searching Hindsight memory...
+                </div>
+
+
+                <div
+                    class="ask-answer"
+                    id="askAnswer"
+                >
+                    Ask ClientPulse something about this client.
+                </div>
+
+
+                <div class="ask-memories">
+
+                    <div class="section-label">
+                        🔍 MEMORIES USED
+                    </div>
+
+                    <div id="askMemories">
+
+                        <p style="color:#94a3b8;font-size:13px;">
+                            Relevant memories will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+    <footer>
+
+        ClientPulse · Powered by AI + Hindsight Memory
+
+    </footer>
+
+
+
+<script>
+
+
+async function analyzeInteraction() {
+
+
+    const client =
+        document.getElementById("client").value.trim();
+
+
+    const interaction =
+        document.getElementById("interaction").value.trim();
+
+
+    const loading =
+        document.getElementById("loading");
+
+
+    const error =
+        document.getElementById("error");
+
+
+    error.style.display = "none";
+
+
+    if (!client || !interaction) {
+
+        error.innerText =
+            "Please enter both the client name and interaction.";
+
+        error.style.display = "block";
+
+        return;
+    }
+
+
+    loading.style.display = "block";
+
+
+    try {
+
+
+        const response = await fetch("/analyze", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                client_name: client,
+
+                interaction: interaction
+
+            })
+
+        });
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail || "Something went wrong."
+            );
+
+        }
+
+
+        /* ======================
+           STATS
+        ====================== */
+
+        document.getElementById(
+            "interactionCount"
+        ).innerText =
+            data.interaction_count || 0;
+
+
+        document.getElementById(
+            "memoryCount"
+        ).innerText =
+            data.memory_count ||
+            (data.memories ? data.memories.length : 0);
+
+
+
+        /* ======================
+           PROFILE
+        ====================== */
+
+        const profile =
+            data.profile || {};
+
+
+        document.getElementById(
+            "preferences"
+        ).innerText =
+            profile.preferences ||
+            "No preferences recorded yet.";
+
+
+        document.getElementById(
+            "dislikes"
+        ).innerText =
+            profile.dislikes ||
+            "No dislikes recorded yet.";
+
+
+        document.getElementById(
+            "budget"
+        ).innerText =
+            profile.budget ||
+            "No budget recorded yet.";
+
+
+        document.getElementById(
+            "feedback"
+        ).innerText =
+            profile.feedback ||
+            "No feedback recorded yet.";
+
+
+        document.getElementById(
+            "importantNotes"
+        ).innerText =
+            profile.important_notes ||
+            "No important notes yet.";
+
+
+
+        /* ======================
+           MEMORIES
+        ====================== */
+
+        const memoriesContainer =
+            document.getElementById("memories");
+
+
+        memoriesContainer.innerHTML = "";
+
+
+        if (
+            data.memories &&
+            data.memories.length > 0
+        ) {
+
+
+            data.memories.forEach(
+                (memory, index) => {
+
+
+                    const div =
+                        document.createElement("div");
+
+
+                    div.className =
+                        "memory";
+
+
+                    div.style.animationDelay =
+                        `${index * 0.08}s`;
+
+
+                    div.innerText =
+                        memory.text || memory;
+
+
+                    memoriesContainer.appendChild(div);
+
+                }
+            );
+
+
+        } else {
+
+
+            memoriesContainer.innerHTML =
+                `
+                <p style="color:#94a3b8;font-size:13px;">
+                    No memories recalled yet.
+                </p>
+                `;
+
+        }
+
+
+
+        /* ======================
+           WHY MEMORY
+        ====================== */
+
+        document.getElementById(
+            "whyMemory"
+        ).innerText =
+            data.why_memory ||
+            "Client memories were used to personalize this response.";
+
+
+
+        /* ======================
+           BEFORE
+        ====================== */
+
+        document.getElementById(
+            "beforeResponse"
+        ).innerText =
+            data.before_response ||
+            "No generic response available.";
+
+
+
+        /* ======================
+           AFTER
+        ====================== */
+
+        document.getElementById(
+            "afterResponse"
+        ).innerText =
+            data.response ||
+            "No personalized response generated.";
+
+
+    }
+
+    catch (err) {
+
+
+        error.innerText =
+            "Error: " + err.message;
+
+
+        error.style.display =
+            "block";
+
+    }
+
+
+    finally {
+
+        loading.style.display =
+            "none";
+
+    }
+
+}
+
+
+
+
+async function askClientPulse() {
+
+    const client =
+        document.getElementById("askClient").value.trim();
+
+    const question =
+        document.getElementById("askQuestion").value.trim();
+
+    const loading =
+        document.getElementById("askLoading");
+
+    const answer =
+        document.getElementById("askAnswer");
+
+    const memoriesContainer =
+        document.getElementById("askMemories");
+
+
+    if (!client || !question) {
+
+        answer.innerText =
+            "Please enter both the client name and your question.";
+
+        return;
+    }
+
+
+    loading.style.display = "block";
+
+    answer.innerText =
+        "Searching the client's memory...";
+
+    memoriesContainer.innerHTML = "";
+
+
+    try {
+
+        const response = await fetch("/ask", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                client_name: client,
+
+                question: question
+
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail || "Something went wrong."
+            );
+
+        }
+
+
+        /* ======================
+           ANSWER
+        ====================== */
+
+        answer.innerText =
+            data.answer ||
+            "I don't have enough information in the client's memory to answer that.";
+
+
+        /* ======================
+           MEMORIES USED
+        ====================== */
+
+        const memories =
+            data.memories_used || [];
+
+
+        if (memories.length > 0) {
+
+            memories.forEach(
+                (memory) => {
+
+                    const div =
+                        document.createElement("div");
+
+                    div.className =
+                        "ask-memory";
+
+                    div.innerText =
+                        memory;
+
+                    memoriesContainer.appendChild(div);
+
+                }
+            );
+
+        } else {
+
+            memoriesContainer.innerHTML = `
+                <p style="color:#94a3b8;font-size:13px;">
+                    No relevant memories were found.
+                </p>
+            `;
+
+        }
+
+    }
+
+    catch (err) {
+
+        answer.innerText =
+            "Error: " + err.message;
+
+    }
+
+    finally {
+
+        loading.style.display = "none";
+
+    }
+
+}
+
+</script>
+
+
+</body>
+</html>
